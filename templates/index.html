@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Procesar PDFs</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Subir archivos PDF para extraer datos</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" name="files[]" multiple accept="application/pdf"/>
+        <button type="submit">Procesar</button>
+    </form>
+    <div id="result"></div>
+    <div id="downloadLink" style="display:none;">
+        <a href="/download" target="_blank">Descargar Excel</a>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const res = await fetch('/process', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            const resultDiv = document.getElementById('result');
+            if(data.status === 'success'){
+                resultDiv.innerHTML = `Procesados ${data.rows} registros exitosamente.`;
+                document.getElementById('downloadLink').style.display = 'block';
+            } else {
+                resultDiv.innerHTML = `Error: ${data.message}`;
+                document.getElementById('downloadLink').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
