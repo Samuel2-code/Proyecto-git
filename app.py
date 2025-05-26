@@ -76,7 +76,7 @@ def index():
 @app.route('/process', methods=['POST'])
 def process():
     if 'files[]' not in request.files:
-        return jsonify({'status': 'error', 'message': 'No files part in request'})
+        return send_file(output_path, as_attachment=True, download_name="datos_pacientes.xlsx")
 
     files = request.files.getlist('files[]')
     all_records = []
