@@ -1,5 +1,6 @@
 import os
 import re
+import uuid
 import pdfplumber
 import pandas as pd
 from flask import Flask, render_template, request, send_file, jsonify
@@ -10,8 +11,8 @@ import tempfile
 
 app = Flask(__name__)
 
-# Expresiones regulares centralizadas
-REGEX_PATTERNS = {
+# Compilar regex una sola vez para mejor rendimiento
+REGEX_PATTERNS_RAW = {
     'Paciente': r'Paciente\s*(.*?)\s*Identificación',
     'Edad': r'Edad\s*(\d+)\s*años',
     'Fecha': r'Atención\s*(.*?)\s*Motivo',
@@ -45,30 +46,24 @@ REGEX_PATTERNS = {
     'Miomatosis': r'Miomatosis ?\s*(.*)'
 }
 
+REGEX_PATTERNS = {k: re.compile(v, re.IGNORECASE) for k, v in REGEX_PATTERNS_RAW.items()}
+
+
 def extract_data_from_pdf(pdf_path):
-    """
-    Extrae datos del PDF leyendo todo el texto completo y realizando búsqueda una sola vez,
-    retornando un diccionario con los datos extraídos o vacío si no se encuentra nada.
-    """
     try:
         with pdfplumber.open(pdf_path) as pdf:
             full_text = ""
-            # Concatenar texto de todas las páginas
             for page in pdf.pages:
                 text = page.extract_text()
                 if text:
-                    full_text += text + "\n"  # separador opcional
-
+                    full_text += text + "\n"
             if not full_text.strip():
                 return {}
-
             record = {}
-            # Buscar cada patrón solo una vez en el texto completo
             for key, pattern in REGEX_PATTERNS.items():
-                match = re.search(pattern, full_text, re.IGNORECASE)
+                match = pattern.search(full_text)
                 if match:
                     record[key] = match.group(1).strip()
-
             return record
     except Exception as e:
         print(f"Error procesando {pdf_path}: {e}")
@@ -95,7 +90,7 @@ def process():
             f.save(temp_path)
             data = extract_data_from_pdf(temp_path)
             if data:
-                data['Archivo'] = filename  # Añadir nombre del archivo
+                data['Archivo'] = filename
                 all_records.append(data)
 
         if not all_records:
@@ -103,7 +98,6 @@ def process():
 
         df = pd.DataFrame(all_records)
 
-        # Eliminar duplicados basados en 'Paciente' y 'Archivo' para mayor certeza
         subset_cols = []
         if 'Paciente' in df.columns:
             subset_cols.append('Paciente')
@@ -115,8 +109,9 @@ def process():
         else:
             df = df.drop_duplicates()
 
-        output_path = os.path.join('static', 'datos_pacientes.xlsx')
-        os.makedirs('static', exist_ok=True)
+        # Generar nombre único para el archivo Excel
+        output_filename = f"datos_pacientes_{uuid.uuid4().hex}.xlsx"
+        output_path = os.path.join(temp_dir, output_filename)
         df.to_excel(output_path, index=False)
 
         wb = load_workbook(output_path)
@@ -126,17 +121,13 @@ def process():
             cell.fill = yellow_fill
         wb.save(output_path)
 
-    return jsonify({'status': 'success', 'file': output_path, 'rows': len(df)})
+        # Enviar el archivo directamente sin guardarlo en carpeta fija
+        return send_file(output_path, as_attachment=True, download_name="datos_pacientes.xlsx")
 
 @app.route('/download')
 def download():
-    output_path = os.path.join('static', 'datos_pacientes.xlsx')
-    if os.path.exists(output_path):
-        return send_file(output_path, as_attachment=True)
-    else:
-        return "Archivo no encontrado", 404
+    # Esta ruta podría eliminarse o adaptarse según el nuevo flujo
+    return "Usa /process para subir archivos y descargar el resultado."
 
-if __name__ == '__main__':
-    app.run(debug=True)
-
-
+if __name__ == "__main__":
+    app.run()
