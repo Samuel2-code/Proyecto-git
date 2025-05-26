@@ -76,7 +76,7 @@ def index():
 @app.route('/process', methods=['POST'])
 def process():
     if 'files[]' not in request.files:
-        return send_file(output_path, as_attachment=True, download_name="datos_pacientes.xlsx")
+        return jsonify({'status': 'error', 'message': 'No files provided'}), 400
 
     files = request.files.getlist('files[]')
     all_records = []
@@ -94,7 +94,7 @@ def process():
                 all_records.append(data)
 
         if not all_records:
-            return jsonify({'status': 'error', 'message': 'No data extracted'})
+            return jsonify({'status': 'error', 'message': 'No data extracted'}), 400
 
         df = pd.DataFrame(all_records)
 
@@ -123,6 +123,7 @@ def process():
 
         # Enviar el archivo directamente sin guardarlo en carpeta fija
         return send_file(output_path, as_attachment=True, download_name="datos_pacientes.xlsx")
+
 
 @app.route('/download')
 def download():
