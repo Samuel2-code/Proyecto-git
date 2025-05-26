@@ -41,33 +41,33 @@
       const formData = new FormData(form);
 
       fetch('/process', {
-        method: 'POST',
-        body: formData
-      })
-        .then(response => {
-          if (!response.ok || response.headers.get("Content-Type") !== "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
-            return response.json().then(data => {
-              throw new Error(data.message || 'Error procesando los archivos.');
-            });
-          }
+  method: 'POST',
+  body: formData
+})
+  .then(response => {
+    if (!response.ok || !response.headers.get("Content-Type").includes("spreadsheetml")) {
+      return response.json().then(data => {
+        throw new Error(data.message || 'Error procesando los archivos.');
+      });
+    }
+    return response.blob();
+  })
+  .then(blob => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'datos_pacientes.xlsx';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    resultDiv.innerHTML =
+      `<div class="alert alert-success">✅ Datos procesados con éxito. El archivo Excel se ha descargado automáticamente.</div>`;
+  })
+  .catch(err => {
+    resultDiv.innerHTML =
+      `<div class="alert alert-error">⚠️ ${err.message}</div>`;
+  });
 
-          return response.blob();
-        })
-        .then(blob => {
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'datos_pacientes.xlsx';
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          resultDiv.innerHTML =
-            `<div class="alert alert-success">Datos procesados con éxito. El archivo Excel se ha descargado automáticamente.</div>`;
-        })
-        .catch(err => {
-          resultDiv.innerHTML =
-            `<div class="alert alert-error">⚠️ ${err.message}</div>`;
-        });
     });
   </script>
 </body>
