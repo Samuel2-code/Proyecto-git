@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Extracción de Datos de PDF</title>
 <style>
-  /* Reset y básico */
+  /* Estilos generales optimizados */
   * {
     box-sizing: border-box;
   }
@@ -16,14 +16,11 @@
     background: linear-gradient(135deg, #6a9cf8 0%, #84d4ca 100%);
     color: #333;
   }
-
-  /* Fondo decorativo con íconos médicos */
   body::before {
     content: "";
     position: fixed;
     top: 0; left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100vw; height: 100vh;
     background-image:
       url("https://cdn-icons-png.flaticon.com/512/2965/2965567.png"),
       url("https://cdn-icons-png.flaticon.com/512/360/360755.png"),
@@ -40,11 +37,11 @@
     position: relative;
     z-index: 1;
     max-width: 800px;
-    margin: 3rem auto 4rem;
-    background: rgba(255 255 255 / 0.92);
+    margin: 3rem auto;
+    background: rgba(255, 255, 255, 0.92);
     padding: 2.5rem 3rem;
     border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
   }
   h1 {
     font-weight: 700;
@@ -86,11 +83,11 @@
     font-size: 1.05rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    box-shadow: 0 6px 15px rgba(21,95,160,0.5);
+    box-shadow: 0 6px 15px rgba(21, 95, 160, 0.5);
   }
   button:hover {
     background-color: #113e6a;
-    box-shadow: 0 8px 25px rgba(17,62,106,0.7);
+    box-shadow: 0 8px 25px rgba(17, 62, 106, 0.7);
   }
   #result {
     font-size: 1rem;
@@ -98,7 +95,7 @@
     padding: 1rem 1.4rem;
     border-radius: 10px;
     min-height: 50px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
   .alert {
     padding: 1rem;
@@ -123,364 +120,55 @@
   a.download-link:hover {
     text-decoration: underline;
   }
-
-  /* Botones pequeños estilo realistas */
-  #open-history-btn, #logout-btn {
-    position: fixed;
-    bottom: 20px;
-    padding: 0.4rem 0.9rem;
-    font-size: 0.9rem;
-    font-weight: 700;
-    border-radius: 35px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.25s ease, box-shadow 0.25s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    z-index: 101;
-    user-select: none;
-  }
-  #open-history-btn {
-    right: 90px;
-    background-color: #3a7ccc;
-    color: #f0f6ff;
-  }
-  #open-history-btn:hover {
-    background-color: #2a5d9a;
-    box-shadow: 0 6px 18px rgba(42,93,154,0.8);
-  }
-  #logout-btn {
-    right: 20px;
-    background-color: #cc4a3a;
-    color: #fff4f2;
-  }
-  #logout-btn:hover {
-    background-color: #9c3529;
-    box-shadow: 0 6px 18px rgba(156,53,41,0.8);
-  }
-  #open-history-btn svg, #logout-btn svg {
-    width: 18px;
-    height: 18px;
-    fill: currentColor;
-  }
-
-  /* Modal historial estilo */
-  #history-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(22, 44, 77, 0.64);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 120;
-  }
-  #history-modal .modal-content {
-    background: white;
-    max-width: 480px;
-    width: 90%;
-    max-height: 420px;
-    border-radius: 16px;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.2);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
-  #history-modal header {
-    background: #2f65b4;
-    padding: 1.1rem 1.5rem;
-    color: #f0f6ff;
-    font-weight: 700;
-    font-size: 1.3rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    user-select: none;
-  }
-  #history-modal header button.close {
-    background: transparent;
-    border: none;
-    font-size: 1.4rem;
-    color: #f0f6ff;
-    cursor: pointer;
-    transition: color 0.3s ease;
-    line-height: 1;
-  }
-  #history-modal header button.close:hover {
-    color: #b4d3fa;
-  }
-  #history-list {
-    list-style: none;
-    margin: 0;
-    padding: 0.75rem 1.25rem;
-    overflow-y: auto;
-    flex-grow: 1;
-    font-size: 0.95rem;
-  }
-  #history-list li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.55rem 0;
-    border-bottom: 1px solid #eee;
-  }
-  #history-list li span {
-    flex: 1;
-    line-height: 1.3;
-  }
-  #history-list li span .index-num {
-    font-weight: 700;
-    color: #3a7ccc;
-    margin-right: 0.6rem;
-  }
-  #history-list li button {
-    background-color: transparent;
-    border: none;
-    color: #cc453a;
-    font-weight: 700;
-    cursor: pointer;
-    font-size: 1.1rem;
-    padding: 0 0.5rem;
-    transition: color 0.2s ease;
-    line-height: 1;
-  }
-  #history-list li button:hover {
-    color: #ff654e;
-  }
-  #modal-footer {
-    padding: 0.75rem 1rem;
-    display: flex;
-    justify-content: flex-end;
-    background: #f0f3ff;
-    border-top: 1px solid #ddd;
-  }
-  #modal-footer button {
-    background: #999;
-    color: white;
-    border: none;
-    padding: 0.55rem 1.2rem;
-    border-radius: 40px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    font-size: 0.95rem;
-  }
-  #modal-footer button:hover {
-    background: #777;
-  }
-
-  @media (max-width: 480px) {
-    .container {
-      margin: 2rem 1rem 3rem;
-      padding: 2rem 1.5rem;
-    }
-    button, #open-history-btn, #logout-btn {
-      width: auto;
-      padding: 0.45rem 1rem;
-      font-size: 0.9rem;
-    }
-    #open-history-btn {
-      right: 90px;
-      bottom: 15px;
-    }
-    #logout-btn {
-      right: 20px;
-      bottom: 15px;
-    }
-    #progress-container {
-      margin-top: 1rem;
-      display: none;
-    }
-
-    #progress-bar {
-      width: 100%;
-      height: 20px;
-  }
 </style>
 </head>
 <body>
-
-<div class="container" role="main">
-  <h1>Extracción de Datos de PDF</h1>
-  <form id="upload-form" enctype="multipart/form-data" novalidate>
-    <label for="files">Selecciona archivos PDF</label>
-    <input type="file" id="files" name="files[]" multiple accept=".pdf" required />
-    <div style="text-align: center; margin-top: 1.25rem;">
-      <button type="submit">Procesar Archivos</button>
-    </div>
-  </form>
-
-  <div id="result" aria-live="polite" aria-atomic="true"></div>
-</div>
-
-
-<!-- Botón ver historial -->
-<button id="open-history-btn" aria-label="Ver historial de descargas" title="Ver historial de descargas" type="button" tabindex="0" aria-pressed="false">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm16-7v2h-2V6h2zm-7-3h2v18h-2V3zm7 9h2v-2h-2v2zM3 19h2v-2H3v2z"/></svg>Historial
-</button>
-
-<!-- Modal del historial -->
-<div id="history-modal" role="dialog" aria-modal="true" aria-labelledby="history-title" tabindex="-1">
-  <div class="modal-content">
-    <header>
-      <span id="history-title">Historial de Descargas</span>
-      <button class="close" aria-label="Cerrar" title="Cerrar historial" type="button">&times;</button>
-    </header>
-    <ul id="history-list" tabindex="0"></ul>
-    <div id="modal-footer">
-      <button id="clear-history" type="button">Limpiar Historial</button>
-    </div>
+  <div class="container" role="main">
+    <h1>Extracción de Datos de PDF</h1>
+    <form id="upload-form" enctype="multipart/form-data" novalidate>
+      <label for="files">Selecciona archivos PDF</label>
+      <input type="file" id="files" name="files[]" multiple accept=".pdf" required />
+      <div style="text-align: center; margin-top: 1.25rem;">
+        <button type="submit">Procesar Archivos</button>
+      </div>
+    </form>
+    <div id="result" aria-live="polite" aria-atomic="true"></div>
   </div>
-</div>
-
 <script>
-  const form = document.getElementById('upload-form');
-  const resultDiv = document.getElementById('result');
-  const logoutBtn = document.getElementById('logout-btn');
-  const openHistoryBtn = document.getElementById('open-history-btn');
-  const historyModal = document.getElementById('history-modal');
-  const closeModalBtn = historyModal.querySelector('button.close');
-  const historyList = document.getElementById('history-list');
-  const clearHistoryBtn = document.getElementById('clear-history');
+const form = document.getElementById('upload-form');
+const resultDiv = document.getElementById('result');
 
-  const STORAGE_KEY = 'pdfExtractDownloadHistory';
-
-  // Funciones para manejar historial
-  function loadHistory() {
-    const historyJson = localStorage.getItem(STORAGE_KEY);
-    if (!historyJson) return [];
-    try {
-      return JSON.parse(historyJson);
-    } catch {
-      return [];
-    }
-  }
-
-  function saveHistory(history) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-  }
-
-  function addToHistory(fileName, count, pacientes) {
-    let history = loadHistory();
-    const date = new Date().toLocaleString();
-    history.unshift({ file: fileName, rows: count, date: date, pacientes: pacientes || [] });
-    if (history.length > 10) history.pop();
-    saveHistory(history);
-    renderHistory();
-  }
-
-  function removeFromHistory(index) {
-    let history = loadHistory();
-    if (index >= 0 && index < history.length) {
-      history.splice(index, 1);
-      saveHistory(history);
-      renderHistory();
-    }
-  }
-
-  function clearHistory() {
-    localStorage.removeItem(STORAGE_KEY);
-    renderHistory();
-  }
-
-  function renderHistory() {
-    const history = loadHistory();
-    if (history.length === 0) {
-      historyList.innerHTML = '<li style="text-align:center; color:#777; font-style: italic;">No hay descargas recientes.</li>';
-      return;
-    }
-    historyList.innerHTML = history
-      .map((entry, index) => {
-        let pacientesStr = '';
-        if (entry.pacientes && entry.pacientes.length > 0) {
-          pacientesStr = '<br><small style="color:#666; font-weight: normal;">Pacientes: ' + entry.pacientes.join(', ') + '</small>';
-        }
-        return `<li>
-          <span><span class="index-num">${index + 1}.</span><strong>${entry.file}</strong> - ${entry.rows} filas - <small>${entry.date}</small>${pacientesStr}</span>
-          <button aria-label="Eliminar entrada" data-index="${index}">&times;</button>
-        </li>`;
-      })
-      .join('');
-    historyList.querySelectorAll('button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        removeFromHistory(parseInt(btn.getAttribute('data-index')));
-      });
-    });
-  }
-
-  // Eventos formulario carga
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    const filesInput = form.files;
-    if (filesInput.files.length === 0) {
-      resultDiv.innerHTML =
-        `<div class="alert alert-error">Por favor selecciona al menos un archivo PDF.</div>`;
-      return;
-    }
+form.addEventListener('submit', function (e) {
+  e.preventDefault();
+  const filesInput = form.files;
+  if (filesInput.files.length === 0) {
     resultDiv.innerHTML =
-      `<div class="alert" style="background:#d1c4ff; color:#4b2ddb; font-weight:700;">Procesando archivos, por favor espera...</div>`;
+      `<div class="alert alert-error">Por favor selecciona al menos un archivo PDF.</div>`;
+    return;
+  }
+  resultDiv.innerHTML =
+    `<div class="alert" style="background:#d1c4ff; color:#4b2ddb; font-weight:700;">Procesando archivos, por favor espera...</div>`;
 
-    const formData = new FormData(form);
+  const formData = new FormData(form);
 
-    fetch('/process', {
-      method: 'POST',
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === 'success') {
-          resultDiv.innerHTML =
-            `<div class="alert alert-success">Datos procesados con éxito. <a href="/download" class="download-link" target="_blank" rel="noopener">Descargar archivo Excel</a> (${data.rows} filas).</div>`;
-          addToHistory('datos_pacientes.xlsx', data.rows, []);
-        } else {
-          resultDiv.innerHTML = `<div class="alert alert-error">${data.message}</div>`;
-        }
-      })
-      .catch(() => {
+  fetch('/process', {
+    method: 'POST',
+    body: formData,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.status === 'success') {
         resultDiv.innerHTML =
-          `<div class="alert alert-error">Error al procesar los archivos. Intenta nuevamente.</div>`;
-      });
-  });
-
-  // Botón cerrar sesión - solo refresca la página para 'cerrar sesión'
-  logoutBtn.addEventListener('click', () => {
-    // En este caso sin autenticación real, solo limpiamos historial y resultado
-    clearHistory();
-    resultDiv.innerHTML = '';
-  });
-
-  // Abrir y cerrar modal historial
-  openHistoryBtn.addEventListener('click', () => {
-    renderHistory();
-    historyModal.style.display = 'flex';
-    historyModal.focus();
-  });
-  closeModalBtn.addEventListener('click', () => {
-    historyModal.style.display = 'none';
-  });
-
-  // Cerrar modal con clic fuera del contenido
-  historyModal.addEventListener('click', (event) => {
-    if (event.target === historyModal) {
-      historyModal.style.display = 'none';
-    }
-  });
-
-  // Botón limpiar historial
-  clearHistoryBtn.addEventListener('click', () => {
-    if (confirm('¿Seguro que deseas limpiar todo el historial de descargas?')) {
-      clearHistory();
-    }
-  });
-
-  // Inicializa historial al cargar
-  renderHistory();
+          `<div class="alert alert-success">Datos procesados con éxito. <a href="/download" class="download-link" target="_blank" rel="noopener">Descargar archivo Excel</a> (${data.rows} filas).</div>`;
+      } else {
+        resultDiv.innerHTML = `<div class="alert alert-error">${data.message}</div>`;
+      }
+    })
+    .catch(() => {
+      resultDiv.innerHTML =
+        `<div class="alert alert-error">Error al procesar los archivos. Intenta nuevamente.</div>`;
+    });
+});
 </script>
 </body>
 </html>
-
