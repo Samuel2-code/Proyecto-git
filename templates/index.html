@@ -3,20 +3,132 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Extracción de Datos de PDF</title>
+  <title>Extracción de Datos PDF</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    /* ... (mantén todos los estilos CSS que ya tienes) ... */
+    * {
+      box-sizing: border-box;
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      background: linear-gradient(-45deg, #8ed6ff, #d8b5ff, #90f7ec, #a6c0fe);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+    }
+
+    @keyframes gradientBG {
+      0% {background-position: 0% 50%;}
+      50% {background-position: 100% 50%;}
+      100% {background-position: 0% 50%;}
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 5rem auto;
+      padding: 3rem 2.5rem;
+      background: rgba(255, 255, 255, 0.94);
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    h1 {
+      text-align: center;
+      color: #3b3b3b;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      font-size: 2rem;
+    }
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.8rem;
+      color: #333;
+      font-size: 1rem;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 1.2rem;
+      border: 2px dashed #a6c0fe;
+      border-radius: 12px;
+      background-color: #f8faff;
+      font-size: 0.95rem;
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="file"]:hover {
+      border-color: #7f9cf5;
+    }
+
+    button {
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 50px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #5a67d8, #6b46c1);
+      transform: scale(1.02);
+      box-shadow: 0 8px 25px rgba(91, 116, 234, 0.5);
+    }
+
+    #result {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      min-height: 50px;
+      transition: all 0.3s ease;
+    }
+
+    .alert {
+      padding: 1rem;
+      border-radius: 12px;
+    }
+
+    .alert-success {
+      background-color: #d3f9d8;
+      color: #237804;
+      border: 1.5px solid #52c41a;
+    }
+
+    .alert-error {
+      background-color: #ffe0e0;
+      color: #a8071a;
+      border: 1.5px solid #ff4d4f;
+    }
+
+    .alert-info {
+      background-color: #e6f7ff;
+      color: #096dd9;
+      border: 1.5px solid #91d5ff;
+    }
   </style>
 </head>
 <body>
-  <div class="container" role="main">
-    <h1>Extracción de Datos de PDF</h1>
+  <div class="container">
+    <h1>Extracción de Datos desde PDF</h1>
     <form id="upload-form" enctype="multipart/form-data" novalidate>
-      <label for="files">Selecciona archivos PDF</label>
+      <label for="files">Selecciona tus archivos PDF</label>
       <input type="file" id="files" name="files[]" multiple accept=".pdf" required />
-      <div style="text-align: center; margin-top: 1.25rem;">
-        <button type="submit">Procesar Archivos</button>
-      </div>
+      <button type="submit">Procesar Archivos</button>
     </form>
     <div id="result" aria-live="polite" aria-atomic="true"></div>
   </div>
@@ -27,47 +139,45 @@
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-
       const filesInput = form.files;
-      if (!form.files || form.files.length === 0) {
+      if (filesInput.files.length === 0) {
         resultDiv.innerHTML =
-          `<div class="alert alert-error">Por favor selecciona al menos un archivo PDF.</div>`;
+          `<div class="alert alert-error">⚠️ Por favor selecciona al menos un archivo PDF.</div>`;
         return;
       }
 
       resultDiv.innerHTML =
-        `<div class="alert" style="background:#d1c4ff; color:#4b2ddb; font-weight:700;">Procesando archivos, por favor espera...</div>`;
+        `<div class="alert alert-info">⏳ Procesando archivos, por favor espera...</div>`;
 
       const formData = new FormData(form);
 
       fetch('/process', {
-  method: 'POST',
-  body: formData
-})
-  .then(response => {
-    if (!response.ok || !response.headers.get("Content-Type").includes("spreadsheetml")) {
-      return response.json().then(data => {
-        throw new Error(data.message || 'Error procesando los archivos.');
-      });
-    }
-    return response.blob();
-  })
-  .then(blob => {
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'datos_pacientes.xlsx';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    resultDiv.innerHTML =
-      `<div class="alert alert-success">✅ Datos procesados con éxito. El archivo Excel se ha descargado automáticamente.</div>`;
-  })
-  .catch(err => {
-    resultDiv.innerHTML =
-      `<div class="alert alert-error">⚠️ ${err.message}</div>`;
-  });
-
+        method: 'POST',
+        body: formData
+      })
+        .then(response => {
+          if (!response.ok || !response.headers.get("Content-Type").includes("spreadsheetml")) {
+            return response.json().then(data => {
+              throw new Error(data.message || 'Error procesando los archivos.');
+            });
+          }
+          return response.blob();
+        })
+        .then(blob => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'datos_pacientes.xlsx';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          resultDiv.innerHTML =
+            `<div class="alert alert-success">✅ Datos procesados con éxito. El archivo se ha descargado automáticamente.</div>`;
+        })
+        .catch(err => {
+          resultDiv.innerHTML =
+            `<div class="alert alert-error">❌ ${err.message}</div>`;
+        });
     });
   </script>
 </body>
