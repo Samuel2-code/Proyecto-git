@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Extracción de Datos PDF</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
@@ -14,117 +14,114 @@
       margin: 0;
       padding: 0;
       height: 100%;
-      font-family: 'Inter', sans-serif;
-      overflow-x: hidden;
-      background: linear-gradient(-45deg, #8ed6ff, #d8b5ff, #90f7ec, #a6c0fe);
-      background-size: 400% 400%;
-      animation: gradientBG 15s ease infinite;
+      font-family: 'Poppins', sans-serif;
+      background: #000;
+      overflow: hidden;
+      color: #fff;
     }
 
-    @keyframes gradientBG {
-      0% {background-position: 0% 50%;}
-      50% {background-position: 100% 50%;}
-      100% {background-position: 0% 50%;}
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
     }
 
     .container {
+      position: relative;
+      z-index: 2;
       max-width: 600px;
       margin: 5rem auto;
       padding: 3rem 2.5rem;
-      background: rgba(255, 255, 255, 0.94);
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
       border-radius: 20px;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     }
 
     h1 {
       text-align: center;
-      color: #3b3b3b;
       font-weight: 700;
-      margin-bottom: 2rem;
       font-size: 2rem;
+      color: #ffffff;
+      margin-bottom: 2rem;
     }
 
     label {
-      font-weight: 600;
       display: block;
-      margin-bottom: 0.8rem;
-      color: #333;
+      margin-bottom: 0.75rem;
+      color: #f0f0f0;
       font-size: 1rem;
     }
 
     input[type="file"] {
       width: 100%;
-      padding: 1.2rem;
-      border: 2px dashed #a6c0fe;
+      padding: 1rem;
+      border: 2px dashed #9f9fff;
       border-radius: 12px;
-      background-color: #f8faff;
-      font-size: 0.95rem;
-      transition: border-color 0.3s ease;
-    }
-
-    input[type="file"]:hover {
-      border-color: #7f9cf5;
+      background-color: rgba(255, 255, 255, 0.05);
+      color: #ccc;
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
     }
 
     button {
-      margin-top: 1.5rem;
       width: 100%;
       padding: 1rem 2rem;
       border: none;
       border-radius: 50px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      background: linear-gradient(135deg, #6c5ce7, #00b894);
       color: #fff;
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       font-weight: 600;
       cursor: pointer;
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 255, 204, 0.3);
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
     }
 
     button:hover {
-      background: linear-gradient(135deg, #5a67d8, #6b46c1);
-      transform: scale(1.02);
-      box-shadow: 0 8px 25px rgba(91, 116, 234, 0.5);
+      transform: scale(1.03);
+      box-shadow: 0 6px 20px rgba(0, 255, 204, 0.6);
     }
 
     #result {
-      margin-top: 1.5rem;
+      margin-top: 2rem;
       padding: 1rem;
       border-radius: 12px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      min-height: 50px;
-      transition: all 0.3s ease;
+      font-size: 1rem;
     }
 
     .alert {
       padding: 1rem;
-      border-radius: 12px;
+      border-radius: 10px;
+      font-weight: 600;
     }
 
     .alert-success {
-      background-color: #d3f9d8;
-      color: #237804;
-      border: 1.5px solid #52c41a;
+      background-color: rgba(0, 255, 153, 0.15);
+      border: 1px solid #00e676;
+      color: #00e676;
     }
 
     .alert-error {
-      background-color: #ffe0e0;
-      color: #a8071a;
-      border: 1.5px solid #ff4d4f;
+      background-color: rgba(255, 82, 82, 0.15);
+      border: 1px solid #ff5252;
+      color: #ff5252;
     }
 
     .alert-info {
-      background-color: #e6f7ff;
-      color: #096dd9;
-      border: 1.5px solid #91d5ff;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid #80d8ff;
+      color: #80d8ff;
     }
   </style>
 </head>
 <body>
+  <canvas id="bg"></canvas>
+
   <div class="container">
-    <h1>Extracción de Datos desde PDF</h1>
+    <h1>Extracción de Datos PDF</h1>
     <form id="upload-form" enctype="multipart/form-data" novalidate>
       <label for="files">Selecciona tus archivos PDF</label>
       <input type="file" id="files" name="files[]" multiple accept=".pdf" required />
@@ -134,6 +131,45 @@
   </div>
 
   <script>
+    // Fondo animado con partículas
+    const canvas = document.getElementById('bg');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let particles = [];
+
+    function initParticles() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      particles = Array.from({ length: 70 }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: Math.random() * 2 + 1,
+        dx: (Math.random() - 0.5) * 0.6,
+        dy: (Math.random() - 0.5) * 0.6
+      }));
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = '#ffffff22';
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        p.x += p.dx;
+        p.y += p.dy;
+
+        if (p.x < 0 || p.x > width) p.dx *= -1;
+        if (p.y < 0 || p.y > height) p.dy *= -1;
+      });
+      requestAnimationFrame(animateParticles);
+    }
+
+    window.addEventListener('resize', initParticles);
+    initParticles();
+    animateParticles();
+
+    // JS para manejar el formulario
     const form = document.getElementById('upload-form');
     const resultDiv = document.getElementById('result');
 
@@ -142,7 +178,7 @@
       const filesInput = form.files;
       if (filesInput.files.length === 0) {
         resultDiv.innerHTML =
-          `<div class="alert alert-error">⚠️ Por favor selecciona al menos un archivo PDF.</div>`;
+          `<div class="alert alert-error">⚠️ Selecciona al menos un archivo PDF.</div>`;
         return;
       }
 
@@ -151,34 +187,56 @@
 
       const formData = new FormData(form);
 
-      fetch('/process', {
-        method: 'POST',
-        body: formData
-      })
-        .then(response => {
-          if (!response.ok || !response.headers.get("Content-Type").includes("spreadsheetml")) {
-            return response.json().then(data => {
-              throw new Error(data.message || 'Error procesando los archivos.');
-            });
-          }
-          return response.blob();
-        })
-        .then(blob => {
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'datos_pacientes.xlsx';
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          resultDiv.innerHTML =
-            `<div class="alert alert-success">✅ Datos procesados con éxito. El archivo se ha descargado automáticamente.</div>`;
-        })
-        .catch(err => {
-          resultDiv.innerHTML =
-            `<div class="alert alert-error">❌ ${err.message}</div>`;
-        });
+     fetch('/process', {
+  method: 'POST',
+  body: formData,
+})
+.then(async (response) => {
+  const contentType = response.headers.get("Content-Type") || "";
+  if (!response.ok) {
+    // Intentar leer el JSON para mensaje de error
+    if (contentType.includes("application/json")) {
+      const errData = await response.json();
+      throw new Error(errData.message || "Error inesperado del servidor.");
+    } else {
+      // Puede ser HTML, mostrar mensaje genérico
+      throw new Error("Error del servidor, respuesta inesperada.");
+    }
+  }
+
+  if (contentType.includes("application/json")) {
+    return response.json();
+  } else if (contentType.includes("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
+    return response.blob();
+  } else {
+    throw new Error("Tipo de respuesta desconocido.");
+  }
+})
+.then(data => {
+  if (data instanceof Blob) {
+    const url = window.URL.createObjectURL(data);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'datos_pacientes.xlsx';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    resultDiv.innerHTML =
+      `<div class="alert alert-success">✅ Datos procesados con éxito. Archivo descargado automáticamente.</div>`;
+  } else if (data.status === 'success') {
+    resultDiv.innerHTML =
+      `<div class="alert alert-success">✅ ${data.message || "Proceso exitoso."}</div>`;
+  } else {
+    throw new Error(data.message || "Error procesando los datos.");
+  }
+})
+.catch(err => {
+  resultDiv.innerHTML =
+    `<div class="alert alert-error">❌ ${err.message}</div>`;
+});
+
     });
   </script>
 </body>
 </html>
+
