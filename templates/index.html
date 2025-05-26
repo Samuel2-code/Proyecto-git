@@ -1,126 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Extracción de Datos de PDF</title>
-<style>
-  /* Estilos generales optimizados */
-  * {
-    box-sizing: border-box;
-  }
-  body, html {
-    height: 100%;
-    margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #6a9cf8 0%, #84d4ca 100%);
-    color: #333;
-  }
-  body::before {
-    content: "";
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    background-image:
-      url("https://cdn-icons-png.flaticon.com/512/2965/2965567.png"),
-      url("https://cdn-icons-png.flaticon.com/512/360/360755.png"),
-      url("https://cdn-icons-png.flaticon.com/512/1055/1055672.png");
-    background-repeat: no-repeat;
-    background-position: 10% 20%, 70% 60%, 50% 80%;
-    background-size: 80px 80px, 90px 90px, 50px 50px;
-    opacity: 0.15;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .container {
-    position: relative;
-    z-index: 1;
-    max-width: 800px;
-    margin: 3rem auto;
-    background: rgba(255, 255, 255, 0.92);
-    padding: 2.5rem 3rem;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
-  }
-  h1 {
-    font-weight: 700;
-    margin-bottom: 1.3rem;
-    color: #155fa0;
-    text-align: center;
-    text-shadow: 0 0 4px #a1dbff88;
-  }
-  form {
-    margin-bottom: 2rem;
-  }
-  label {
-    font-size: 1.1rem;
-    font-weight: 600;
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #12436b;
-  }
-  input[type="file"] {
-    width: 100%;
-    border: 2px dashed #6caedb;
-    border-radius: 10px;
-    padding: 1.2rem;
-    font-size: 1rem;
-    cursor: pointer;
-    background: #eff9ff;
-    transition: border-color 0.3s ease;
-  }
-  input[type="file"]:hover {
-    border-color: #155fa0;
-  }
-  button {
-    background-color: #155fa0;
-    color: white;
-    font-weight: 600;
-    padding: 0.75rem 1.4rem;
-    border: none;
-    border-radius: 50px;
-    font-size: 1.05rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    box-shadow: 0 6px 15px rgba(21, 95, 160, 0.5);
-  }
-  button:hover {
-    background-color: #113e6a;
-    box-shadow: 0 8px 25px rgba(17, 62, 106, 0.7);
-  }
-  #result {
-    font-size: 1rem;
-    margin-top: 1rem;
-    padding: 1rem 1.4rem;
-    border-radius: 10px;
-    min-height: 50px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-  .alert {
-    padding: 1rem;
-    border-radius: 10px;
-    font-weight: 600;
-  }
-  .alert-success {
-    background-color: #dbf7dd;
-    color: #1c7f1c;
-    border: 1.5px solid #53b553;
-  }
-  .alert-error {
-    background-color: #fcdada;
-    color: #9e1e1e;
-    border: 1.5px solid #df4747;
-  }
-  a.download-link {
-    font-weight: 700;
-    color: #155fa0;
-    text-decoration: none;
-  }
-  a.download-link:hover {
-    text-decoration: underline;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Extracción de Datos de PDF</title>
+  <style>
+    /* ... (mantén todos los estilos CSS que ya tienes) ... */
+  </style>
 </head>
 <body>
   <div class="container" role="main">
@@ -134,41 +20,55 @@
     </form>
     <div id="result" aria-live="polite" aria-atomic="true"></div>
   </div>
-<script>
-const form = document.getElementById('upload-form');
-const resultDiv = document.getElementById('result');
 
-form.addEventListener('submit', function (e) {
-  e.preventDefault();
-  const filesInput = form.files;
-  if (filesInput.files.length === 0) {
-    resultDiv.innerHTML =
-      `<div class="alert alert-error">Por favor selecciona al menos un archivo PDF.</div>`;
-    return;
-  }
-  resultDiv.innerHTML =
-    `<div class="alert" style="background:#d1c4ff; color:#4b2ddb; font-weight:700;">Procesando archivos, por favor espera...</div>`;
+  <script>
+    const form = document.getElementById('upload-form');
+    const resultDiv = document.getElementById('result');
 
-  const formData = new FormData(form);
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
 
-  fetch('/process', {
-    method: 'POST',
-    body: formData,
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.status === 'success') {
+      const filesInput = form.files;
+      if (!form.files || form.files.length === 0) {
         resultDiv.innerHTML =
-          `<div class="alert alert-success">Datos procesados con éxito. <a href="/download" class="download-link" target="_blank" rel="noopener">Descargar archivo Excel</a> (${data.rows} filas).</div>`;
-      } else {
-        resultDiv.innerHTML = `<div class="alert alert-error">${data.message}</div>`;
+          `<div class="alert alert-error">Por favor selecciona al menos un archivo PDF.</div>`;
+        return;
       }
-    })
-    .catch(() => {
+
       resultDiv.innerHTML =
-        `<div class="alert alert-error">Error al procesar los archivos. Intenta nuevamente.</div>`;
+        `<div class="alert" style="background:#d1c4ff; color:#4b2ddb; font-weight:700;">Procesando archivos, por favor espera...</div>`;
+
+      const formData = new FormData(form);
+
+      fetch('/process', {
+        method: 'POST',
+        body: formData
+      })
+        .then(response => {
+          if (!response.ok || response.headers.get("Content-Type") !== "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
+            return response.json().then(data => {
+              throw new Error(data.message || 'Error procesando los archivos.');
+            });
+          }
+
+          return response.blob();
+        })
+        .then(blob => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'datos_pacientes.xlsx';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          resultDiv.innerHTML =
+            `<div class="alert alert-success">Datos procesados con éxito. El archivo Excel se ha descargado automáticamente.</div>`;
+        })
+        .catch(err => {
+          resultDiv.innerHTML =
+            `<div class="alert alert-error">⚠️ ${err.message}</div>`;
+        });
     });
-});
-</script>
+  </script>
 </body>
 </html>
